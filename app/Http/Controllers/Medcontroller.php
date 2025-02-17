@@ -29,18 +29,15 @@ class MedController extends Controller
         // Maak een nieuwe MedTracker record aan
         $medTracker = new MedTracker();
 
-        // Stel de last_dose in op de huidige tijd
         $medTracker->last_dose = Carbon::now();
 
-        // Zet meds_taken op true of false afhankelijk van de checkbox
         $medTracker->meds_taken = $meds_taken;
 
         // Bereken next_dose als last_dose + 4 uur
         $medTracker->next_dose = $medTracker->last_dose->copy()->addHours(4);
 
-        // Sla het record op in de database
         $medTracker->save();
-        // Geef een terugmelding aan de gebruiker
+
         return redirect('/')->with('success', 'gegevens succesvol opgeslagen!');
     }
 }
