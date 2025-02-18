@@ -29,7 +29,7 @@ class MedController extends Controller
         // Maak een nieuwe MedTracker record aan
         $medTracker = new MedTracker();
 
-        $medTracker->last_dose = Carbon::now();
+        $medTracker->last_dose = Carbon::now()->addHours(1);
 
         $medTracker->meds_taken = $meds_taken;
 
