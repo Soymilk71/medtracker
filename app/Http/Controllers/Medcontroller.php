@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\MedTracker;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class MedController extends Controller
 {
@@ -40,4 +41,26 @@ class MedController extends Controller
 
         return redirect('/')->with('success', 'gegevens succesvol opgeslagen!');
     }
+
+    public function getGraphData()
+    {
+        // Get the first and second dose for each day
+        $medicationData = DB::table('meds_data as m1')
+            ->select(
+                DB::raw('DATE(m1.created_at) as date'),
+                DB::raw('MIN(m1.last_dose) as first_dose'),
+                DB::raw('MAX(CASE WHEN m2.last_dose > m1.last_dose THEN m2.last_dose ELSE NULL END) as second_dose')
+            )
+            ->join('meds_data as m2', function($join) {
+                // Join on the same date and ensure we get the second dose based on ordering
+                $join->on(DB::raw('DATE(m2.created_at)'), '=', DB::raw('DATE(m1.created_at)'))
+                     ->whereRaw('m2.last_dose > m1.last_dose');
+            })
+            ->groupBy(DB::raw('DATE(m1.created_at)'))
+            ->orderBy('date', 'ASC')
+            ->get();
+    
+        return response()->json($medicationData);
+    }
+    
 }
